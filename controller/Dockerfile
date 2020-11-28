@@ -1,2 +1,3 @@
 FROM python:3.8-buster
-CMD ["python","-c", "import datetime; print(datetime.datetime.now())"]
+COPY app/__main__.py /__main__.py
+CMD ["python","/__main__.py"]

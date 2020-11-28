@@ -34,10 +34,10 @@ class SystemMetrics:
                 'swap': self.mem_swap()
             },
             'disk': {
-                'I/O': self.disk_io(self._disk_io_init, self._inittime)
+                'IO': self.disk_io(self._disk_io_init, self._inittime)
             },
             'net': {
-                'I/O': self.net_io(self._net_io_init, self._inittime)
+                'IO': self.net_io(self._net_io_init, self._inittime)
             }
         }
 

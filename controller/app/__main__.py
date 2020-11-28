@@ -1,18 +1,22 @@
 import time
 import urllib.request
 import json
+import sys
 
 class Config:
     interval_in_seconds = 1
     path_separator = '/'
     thresholds = [
-        { 'path': 'cpu/load avg/0', 'value': 2, 'unit': 'points', 'compare': 'less' },
-        { 'path': 'disk/IO/write', 'value': 53020, 'unit': 'points', 'compare': 'more' }
+        { 'path': 'cpu/load avg/0', 'value': 2, 'unit': 'points', 'compare': 'less', 'action': 'shutdown' },
+        { 'path': 'disk/IO/write', 'value': 53020, 'unit': 'points', 'compare': 'more', 'action': 'shutdown' }
     ]
 config = Config()
 
 def action(threshold):
     print(threshold, flush=True)
+    if threshold['action'] == 'shutdown':
+        print('SHUTDOWN', flush=True)
+        sys.exit(0)
 
 def extract_metric_value(metrics, path):
     extracted = metrics

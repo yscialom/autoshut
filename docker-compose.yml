@@ -6,3 +6,13 @@ services:
   controller:
     build: controller
     network_mode: host
+    volumes:
+      - config:/etc/autoshut
+
+volumes:
+  config:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/config
+      o: bind

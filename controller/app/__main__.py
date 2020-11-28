@@ -2,15 +2,29 @@ import time
 import urllib.request
 import json
 import sys
+import configparser
 
 class Config:
-    interval_in_seconds = 1
-    path_separator = '/'
-    thresholds = [
-        { 'path': 'cpu/load avg/0', 'value': 2, 'unit': 'points', 'compare': 'less', 'action': 'shutdown' },
-        { 'path': 'disk/IO/write', 'value': 53020, 'unit': 'points', 'compare': 'more', 'action': 'shutdown' }
-    ]
-config = Config()
+    def __init__(self, config_filepath):
+        parser = configparser.ConfigParser()
+        parser.read(config_filepath)
+
+        try:
+            self.interval_in_seconds = parser['options']['interval_in_seconds']
+            self.threshold_path_separator = parser['options']['threshold_path_separator']
+            self.thresholds = []
+            for section in parser.sections():
+                if section.startswith('rule'):
+                    self.thresholds.append({
+                        'metric': parser[section]['metric'],
+                        'value': parser[section]['value'],
+                        'unit': parser[section]['unit'],
+                        'compare': parser[section]['compare'],
+                        'action': parser[section]['action']
+                    })
+        except KeyError:
+            #log
+            raise
 
 def action(threshold):
     print(threshold, flush=True)
@@ -18,7 +32,7 @@ def action(threshold):
         print('SHUTDOWN', flush=True)
         sys.exit(0)
 
-def extract_metric_value(metrics, path):
+def extract_metric_value(config, metrics, path):
     extracted = metrics
     for key in path.split(config.path_separator):
         try:
@@ -32,7 +46,7 @@ def extract_metric_value(metrics, path):
     return extracted
     
 
-def loop():
+def check(config):
     try:
         metrics = json.loads(urllib.request.urlopen("http://localhost/").read())
         print(metrics, flush=True)
@@ -41,7 +55,7 @@ def loop():
         return # log
     for threshold in config.thresholds:
         print(f'DEBUG: threshold: {threshold}')
-        metric = extract_metric_value(metrics, threshold['path'])
+        metric = extract_metric_value(config, metrics, threshold['path'])
         print(f'DEBUG: metric: {metric}', flush=True)
         if metric is None:
             continue # log
@@ -55,8 +69,9 @@ def loop():
                 
 
 def main():
+    config = Config('/etc/autoshut/controller.ini')
     while True:
-        loop()
+        check(config)
         time.sleep(config.interval_in_seconds)
 
 if __name__ == '__main__':

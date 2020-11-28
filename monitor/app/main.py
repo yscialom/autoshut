@@ -51,17 +51,21 @@ class SystemMetrics:
         return SystemMetrics._unit(value, 'b/s')
     def _Bps(value):
         return SystemMetrics._unit(value, 'B/s')
+    def _points(value):
+        return SystemMetrics._unit(value, 'points')
+    def _percent(value):
+        return SystemMetrics._unit(value, '%')
 
     # CPU
     def cpu_load_avg(self):
-        return psutil.getloadavg()
+        return [ SystemMetrics._points(load) for load in psutil.getloadavg() ]
 
     # MEM
     def _memory(self, total, available):
         return {
-            'total': total,
-            'available': available,
-            'usage ratio': 1 - available/total
+            'total': SystemMetrics._B(total),
+            'available': SystemMetrics._B(available),
+            'usage ratio': SystemMetrics._percent(1 - available/total)
         }
 
     def mem_virtual(self):

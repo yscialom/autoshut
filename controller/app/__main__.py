@@ -4,6 +4,7 @@ import json
 
 class Config:
     interval_in_seconds = 1
+    path_separator = '/'
     thresholds = [
         { 'path': 'cpu/load avg/0', 'value': 2, 'unit': 'points', 'compare': 'less' },
         { 'path': 'disk/IO/write', 'value': 53020, 'unit': 'points', 'compare': 'more' }
@@ -15,7 +16,7 @@ def action(threshold):
 
 def extract_metric_value(metrics, path):
     extracted = metrics
-    for key in path.split('/'):
+    for key in path.split(config.path_separator):
         try:
             key = int(key)
         except ValueError:

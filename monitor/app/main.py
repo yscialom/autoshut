@@ -17,6 +17,20 @@ def about():
 
 
 class SystemMetrics:
+    def report(self):
+        return {
+            'cpu': {
+                'load avg': self.cpu_load_avg()
+            },
+            'mem': {
+                'virt': self.mem_virtual(),
+                'swap': self.mem_swap()
+            },
+            'disk': {
+                'I/O': self.disk_io()
+            }
+        }
+
     def cpu_load_avg(self):
         return psutil.getloadavg()
 
@@ -46,15 +60,4 @@ class SystemMetrics:
 @app.route('/')
 def snapshot():
     snap = SystemMetrics()
-    return {
-        'cpu': {
-            'load avg': snap.cpu_load_avg()
-        },
-        'mem': {
-            'virt': snap.mem_virtual(),
-            'swap': snap.mem_swap()
-        },
-        'disk': {
-            'I/O': snap.disk_io()
-        }
-    }
+    return snap.report()

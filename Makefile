@@ -7,6 +7,7 @@ help:
 	@echo "make build ....... build the service docker images"
 	@echo "make start ....... start the service docker containers"
 	@echo "make stop ........ gracefully stop the service"
+	@echo "make clean ....... remove mount point"
 
 codestyle:
 	@python3 -m pycodestyle --max-line-length=120 monitor/app controller/app
@@ -15,7 +16,11 @@ build:
 	@docker-compose build
 
 start:
+	@mkdir -p config
 	@docker-compose up -d
 
 stop:
 	@docker-compose down
+
+clean:
+	@rm -r config

@@ -16,7 +16,7 @@ class Config:
 
     def reload(self):
         """Read the configuration file and update the instance."""
-        self._logger.info(f'Loading configuration from file "{self._config_filepath}"')
+        self._logger.info(f'Loading configuration from file "{self._config_filepath}".')
         parser = configparser.ConfigParser()
         parser.read(self._config_filepath)
 
@@ -27,7 +27,7 @@ class Config:
             self.threshold_metric_path_separator = parser['options']['metric_path_separator']
             self._logger.debug(f'metric_path_separator: {self.threshold_metric_path_separator}')
         except KeyError as e:
-            self._logger.error(f'{self._config_filepath}: missing entry in [option] section')
+            self._logger.error(f'{self._config_filepath}: missing entry in [option] section.')
             self._logger.debug(e)
             return self
 
@@ -45,7 +45,7 @@ class Config:
                         action=parser[section]['action']
                     ))
                 except KeyError as e:
-                    self._logger.error(f'invalid rule {section} (missing entry)')
+                    self._logger.error(f'invalid rule {section} (missing entry).')
                     self._logger.debug(e)
                     continue
         self._logger.debug('reached end of configuration file')

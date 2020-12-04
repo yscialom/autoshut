@@ -4,6 +4,7 @@ import json
 
 class MetricServer:
     def __init__(self, logger, url, config):
+        self._logger = logger
         self._url = url
         self._metric_path_separator = config.threshold_metric_path_separator
 
@@ -29,7 +30,9 @@ class MetricServer:
             return metric
 
     def snapshot(self):
+        self._logger.info(f'Taking metrics snapshot from "{self._url}".')
         try:
             return self.Snapshot(json.loads(urllib.request.urlopen(self._url).read()), self._metric_path_separator)
         except urllib.error.URLError as e:
-            print(e, flush=True)  # proper log
+            self._logger.warning('Cannot read from metric server.')
+            self._logger.debug(e)

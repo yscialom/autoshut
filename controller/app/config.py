@@ -33,6 +33,7 @@ class Config:
         except KeyError:
             # log
             raise
+        return self
 
     def __init__(self, config_filepath):
         """Read the configuration file

@@ -1,10 +1,9 @@
 #!_ python3
 import time
-import urllib.request
-import json
 import sys
 
-from . import config
+from config import Config
+from metric_server import MetricServer
 
 
 def action(threshold):
@@ -14,32 +13,12 @@ def action(threshold):
         sys.exit(0)
 
 
-def extract_metric_value(config, metrics, path):
-    extracted = metrics
-    for key in path.split(config.threshold_metric_path_separator):
-        try:
-            key = int(key)
-        except ValueError:
-            pass  # not exceptional
-        try:
-            extracted = extracted[key]
-        except KeyError:
-            return None
-    return extracted
-
-
-def apply_rules(config):
-    """Apply threshold rules of @a config against system metrics"""
-    try:
-        metrics = json.loads(urllib.request.urlopen("http://localhost/").read())
-        print(metrics, flush=True)
-    except urllib.error.URLError as e:
-        print(e, flush=True)
-        return  # log
-    config.reload()
-    for threshold in config.thresholds:
+def apply_rules(thresholds, mserver):
+    """Apply threshold rules against system metrics"""
+    metrics = mserver.snapshot()
+    for threshold in thresholds:
         print(f'DEBUG: threshold: {threshold}')
-        metric = extract_metric_value(config, metrics, threshold['metric'])
+        metric = metrics[threshold['metric']]
         print(f'DEBUG: metric: {metric}', flush=True)
         if metric is None:
             continue  # log
@@ -54,8 +33,9 @@ def apply_rules(config):
 
 def main():
     config = Config('/etc/autoshut/controller.ini')
+    mserver = MetricServer('http://localhost/', config)
     while True:
-        apply_rules(config)
+        apply_rules(config.reload().thresholds, mserver)
         time.sleep(config.interval_in_seconds)
 
 

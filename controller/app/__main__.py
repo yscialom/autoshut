@@ -4,6 +4,7 @@ import sys
 
 from config import Config
 from metric_server import MetricServer
+from threshold import Threshold
 
 
 def action(threshold):
@@ -18,17 +19,10 @@ def apply_rules(thresholds, mserver):
     metrics = mserver.snapshot()
     for threshold in thresholds:
         print(f'DEBUG: threshold: {threshold}')
-        metric = metrics[threshold['metric']]
+        metric = metrics[threshold.metric_path()]
         print(f'DEBUG: metric: {metric}', flush=True)
-        if metric is None:
-            continue  # log
-        try:
-            if threshold['compare'] == 'less' and metric['value'] < threshold['value']:
-                action(threshold)
-            if threshold['compare'] == 'more' and metric['value'] > threshold['value']:
-                action(threshold)
-        except KeyError:
-            continue  # log
+        if threshold.compare(metric):
+            action(threshold)
 
 
 def main():

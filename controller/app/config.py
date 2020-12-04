@@ -1,5 +1,7 @@
 import configparser
 
+from threshold import Threshold
+
 
 class Config:
     """
@@ -23,13 +25,13 @@ class Config:
             self.thresholds = []
             for section in parser.sections():
                 if section.startswith('rule'):
-                    self.thresholds.append({
-                        'metric': parser[section]['metric'],
-                        'value': float(parser[section]['value']),
-                        'unit': parser[section]['unit'],
-                        'compare': parser[section]['compare'],
-                        'action': parser[section]['action']
-                    })
+                    self.thresholds.append(Threshold(
+                        metric=parser[section]['metric'],
+                        value=float(parser[section]['value']),
+                        unit=parser[section]['unit'],
+                        compare=parser[section]['compare'],
+                        action=parser[section]['action']
+                    ))
         except KeyError:
             # log
             raise

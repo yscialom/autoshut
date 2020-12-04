@@ -2,6 +2,7 @@
 import time
 import sys
 
+from logger import getLogger
 from config import Config
 from metric_server import MetricServer
 from threshold import Threshold
@@ -14,24 +15,29 @@ def action(threshold):
         sys.exit(0)
 
 
-def apply_rules(thresholds, mserver):
+def apply_rules(logger, thresholds, mserver):
     """Apply threshold rules against system metrics"""
     metrics = mserver.snapshot()
     for threshold in thresholds:
-        print(f'DEBUG: threshold: {threshold}')
+        logger.debug(f'threshold: {threshold}')
         metric = metrics[threshold.metric_path()]
-        print(f'DEBUG: metric: {metric}', flush=True)
+        logger.debug(f'metric: {metric}')
         if threshold.compare(metric):
             action(threshold)
 
 
 def main():
-    config = Config('/etc/autoshut/controller.ini')
-    mserver = MetricServer('http://localhost/', config)
+    logger = getLogger('controller')
+    logger.info('Starting controller...')
+    config = Config(logger, '/etc/autoshut/controller.ini')
+    mserver = MetricServer(logger, 'http://localhost/', config)
+    logger.info('Started.')
     while True:
-        apply_rules(config.reload().thresholds, mserver)
+        logger.info('Event loop started.')
+        apply_rules(logger, config.reload().thresholds, mserver)
         time.sleep(config.interval_in_seconds)
 
 
 if __name__ == '__main__':
+    print('Application started by __main__ script')
     main()

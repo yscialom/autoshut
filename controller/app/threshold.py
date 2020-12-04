@@ -15,7 +15,7 @@ class Threshold:
             'more': lambda normalized_metric: normalized_metric > self._normalized_value
         }
         if metric:
-            return compare_functions[metric['compare']](self._normalize(metric['value'], metric['unit']))
+            return compare_functions[self._compare](self._normalize(metric['value'], metric['unit']))
         return False
 
     def metric_path(self):

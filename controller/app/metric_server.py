@@ -3,7 +3,7 @@ import json
 
 
 class MetricServer:
-    def __init__(self, url, config):
+    def __init__(self, logger, url, config):
         self._url = url
         self._metric_path_separator = config.threshold_metric_path_separator
 
@@ -12,7 +12,7 @@ class MetricServer:
             self._data = data
             self._metric_path_separator = metric_path_separator
 
-        def _key_type_handler(key):
+        def _key_type_handler(self, key):
             try:
                 return int(key)
             except ValueError:
@@ -30,6 +30,6 @@ class MetricServer:
 
     def snapshot(self):
         try:
-            return Snapshot(json.loads(urllib.request.urlopen(self._url).read()))
+            return self.Snapshot(json.loads(urllib.request.urlopen(self._url).read()), self._metric_path_separator)
         except urllib.error.URLError as e:
             print(e, flush=True)  # proper log

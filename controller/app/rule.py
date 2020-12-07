@@ -44,6 +44,8 @@ action_register = Register()
 class Rule:
     """A rule defines what action to apply when some criterion is reached."""
 
+    RULE_PREFIX = 'rule '
+
     def comparator(name):
         def decorator(f):
             comparator_register[name] = f
@@ -64,7 +66,7 @@ class Rule:
             self._logger.warning('Empty metric.')
             return False
         if self._comparator_name not in comparator_register:
-            self._logger.warning('Unknown comparator "{self._comparator_name}" on rule "{self._name}".')
+            self._logger.warning('Unknown comparator "{self._comparator_name}" on rule "{self.name}".')
             return False
         return comparator_register(self._comparator_name, self, self._normalize(metric['value'], metric['unit']))
 
@@ -86,7 +88,7 @@ class Rule:
                either "nop", or "shutdown"
         """
         self._logger = kwargs['logger']
-        self._name = kwargs['name'][len("rule "):]
+        self.name = kwargs['name'][len(self.RULE_PREFIX):]
         self._metric = kwargs['metric']
         self._value = kwargs['value']
         self._unit = kwargs['unit']
@@ -96,7 +98,7 @@ class Rule:
         self._action = Action(kwargs['logger'], self)
 
     def __str__(self):
-        return f'rule "{self._name}" triggers when {self._metric} is {self._comparator_name}'\
+        return f'rule "{self.name}" triggers when {self._metric} is {self._comparator_name}'\
             f' than {self._value} {self._unit} and apply "{self._action_name}"'
 
     def _normalize(self, value, unit):
@@ -134,9 +136,11 @@ class Action:
         self._rule = rule
 
     def __call__(self, metric):
-        self._logger.info(f'rule "{self._rule._name}" triggered by metric {metric}')
+        self._logger.info(f'rule "{self._rule.name}" triggered by metric "{self._rule._metric}": '
+                          f'{metric["value"]} {metric["unit"]} {self._rule._comparator_name} than '
+                          f'{self._rule._value} {self._rule._unit}')
         name = self._rule._action_name
         if name not in action_register:
-            self._logger.warning(f'Unknown action "{name}" on rule "{self._rule._name}".')
+            self._logger.warning(f'Unknown action "{name}" on rule "{self._rule.name}".')
             return False
         return action_register(name, self, metric)

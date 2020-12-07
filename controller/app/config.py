@@ -1,4 +1,6 @@
 import configparser
+import datetime
+import pathlib
 
 from rule import Rule
 
@@ -15,7 +17,14 @@ class Config:
     """
 
     def reload(self):
-        """Read the configuration file and update the instance."""
+        """Read the configuration file if needed and update the instance."""
+        file_time = pathlib.Path(self._config_filepath).stat().st_mtime
+        if self._reload_time < file_time:
+            self._reload_time = datetime.datetime.now().timestamp()
+            self._reload_impl()
+        return self
+
+    def _reload_impl(self):
         self._logger.info(f'Loading configuration from file "{self._config_filepath}".')
         parser = configparser.ConfigParser()
         parser.read(self._config_filepath)
@@ -29,13 +38,14 @@ class Config:
         except KeyError as e:
             self._logger.error(f'{self._config_filepath}: missing entry in [option] section.')
             self._logger.debug(e)
-            return self
+            return
 
         # load [rules]
         self.rules = []
         for section in parser.sections():
-            if section.startswith('rule'):
-                self._logger.debug(f'found new rule "{section}"')
+            if section.startswith(Rule.RULE_PREFIX):
+                rulename = section[len(Rule.RULE_PREFIX):]
+                self._logger.info(f'found new rule "{rulename}"')
                 try:
                     self.rules.append(Rule(
                         logger=self._logger,
@@ -47,11 +57,11 @@ class Config:
                         action=parser[section]['action']
                     ))
                 except KeyError as e:
-                    self._logger.error(f'invalid rule {section} (missing entry).')
+                    self._logger.error(f'invalid rule {rulename} (missing entry).')
                     self._logger.debug(e)
                     continue
-        self._logger.debug('reached end of configuration file')
-        return self
+        self._logger.info('Configuration file loaded.')
+        return
 
     def __init__(self, logger, config_filepath):
         """Read the configuration file
@@ -65,4 +75,5 @@ class Config:
         """
         self._logger = logger
         self._config_filepath = config_filepath
+        self._reload_time = 0
         self.reload()

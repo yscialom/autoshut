@@ -1,6 +1,6 @@
 import configparser
 
-from threshold import Threshold
+from rule import Rule
 
 
 class Config:
@@ -24,24 +24,26 @@ class Config:
         try:
             self.interval_in_seconds = int(parser['options']['interval_in_seconds'])
             self._logger.debug(f'interval_in_seconds: {self.interval_in_seconds}')
-            self.threshold_metric_path_separator = parser['options']['metric_path_separator']
-            self._logger.debug(f'metric_path_separator: {self.threshold_metric_path_separator}')
+            self.rule_metric_path_separator = parser['options']['metric_path_separator']
+            self._logger.debug(f'metric_path_separator: {self.rule_metric_path_separator}')
         except KeyError as e:
             self._logger.error(f'{self._config_filepath}: missing entry in [option] section.')
             self._logger.debug(e)
             return self
 
         # load [rules]
-        self.thresholds = []
+        self.rules = []
         for section in parser.sections():
             if section.startswith('rule'):
                 self._logger.debug(f'found new rule "{section}"')
                 try:
-                    self.thresholds.append(Threshold(
+                    self.rules.append(Rule(
+                        logger=self._logger,
+                        name=section,
                         metric=parser[section]['metric'],
                         value=float(parser[section]['value']),
                         unit=parser[section]['unit'],
-                        compare=parser[section]['compare'],
+                        comparator=parser[section]['comparator'],
                         action=parser[section]['action']
                     ))
                 except KeyError as e:

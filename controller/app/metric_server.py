@@ -6,7 +6,7 @@ class MetricServer:
     def __init__(self, logger, url, config):
         self._logger = logger
         self._url = url
-        self._metric_path_separator = config.threshold_metric_path_separator
+        self._metric_path_separator = config.rule_metric_path_separator
 
     class Snapshot:
         def __init__(self, data, metric_path_separator):

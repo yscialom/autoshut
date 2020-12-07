@@ -34,31 +34,37 @@ class SystemMetrics:
                 'swap': self.mem_swap()
             },
             'disk': {
-                'I/O': self.disk_io(self._disk_io_init, self._inittime)
+                'IO': self.disk_io(self._disk_io_init, self._inittime)
             },
             'net': {
-                'I/O': self.net_io(self._net_io_init, self._inittime)
+                'IO': self.net_io(self._net_io_init, self._inittime)
             }
         }
 
     def _unit(value, unit):
-        return { 'value': value, 'unit': unit }
+        return {'value': value, 'unit': unit}
+
     def _b(value):
         return SystemMetrics._unit(value, 'b')
+
     def _B(value):
         return SystemMetrics._unit(value, 'B')
+
     def _bps(value):
         return SystemMetrics._unit(value, 'b/s')
+
     def _Bps(value):
         return SystemMetrics._unit(value, 'B/s')
+
     def _points(value):
         return SystemMetrics._unit(value, 'points')
+
     def _percent(value):
         return SystemMetrics._unit(value, '%')
 
     # CPU
     def cpu_load_avg(self):
-        return [ SystemMetrics._points(load) for load in psutil.getloadavg() ]
+        return [SystemMetrics._points(load) for load in psutil.getloadavg()]
 
     # MEM
     def _memory(self, total, available):
@@ -76,7 +82,6 @@ class SystemMetrics:
         raw = psutil.swap_memory()
         return self._memory(raw.total, raw.free)
 
-
     # IO
     def _io(self, r, w):
         return {
@@ -86,7 +91,7 @@ class SystemMetrics:
 
     def _io_diff(self, oldsnap, newsnap, snaptime):
         timediff = (datetime.datetime.now() - snaptime).total_seconds()
-        return { key: SystemMetrics._Bps((newsnap[key]['value'] - oldsnap[key]['value']) / timediff) for key in newsnap }
+        return {key: SystemMetrics._Bps((newsnap[key]['value'] - oldsnap[key]['value']) / timediff) for key in newsnap}
 
     # DISK
     def _disk_io_snap(self):
@@ -105,7 +110,6 @@ class SystemMetrics:
     def net_io(self, oldsnap, snaptime):
         newsnap = self._net_io_snap()
         return self._io_diff(oldsnap, newsnap, snaptime)
-
 
 
 @app.route('/')

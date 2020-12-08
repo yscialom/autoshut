@@ -88,7 +88,7 @@ class Rule:
                either "nop", or "shutdown"
         """
         self._logger = kwargs['logger']
-        self.name = kwargs['name'][len(self.RULE_PREFIX):]
+        self.name = kwargs['name']
         self._metric = kwargs['metric']
         self._value = kwargs['value']
         self._unit = kwargs['unit']

@@ -10,6 +10,8 @@ from rule import Rule
 def apply_rules(logger, rules, mserver):
     """Apply threshold rules against system metrics"""
     metrics = mserver.snapshot()
+    if not metrics:
+        return
     for rule in rules:
         logger.info(f'Checking rule "{rule.name}"')
         logger.debug(f'rule: {rule}')

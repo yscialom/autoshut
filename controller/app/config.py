@@ -49,7 +49,7 @@ class Config:
                 try:
                     self.rules.append(Rule(
                         logger=self._logger,
-                        name=section,
+                        name=rulename,
                         metric=parser[section]['metric'],
                         value=float(parser[section]['value']),
                         unit=parser[section]['unit'],

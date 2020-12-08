@@ -17,15 +17,20 @@ codestyle:
 build:
 	@docker-compose build
 
-start:
-	@mkdir -p config
+prepare:
+	@mkdir -p config signals
+	@echo -n > signals/controller_shutdown_signal
+
+start: prepare
+	@controller/host_control.sh & echo "host_control.sh started (pid $$!)"
 	@docker-compose up -d
 
 restart:
 	@docker-compose restart
-
+	@pkill host_control.sh
 stop:
 	@docker-compose down
+	@pkill -e host_control.sh
 
 clean:
 	@rm -r config

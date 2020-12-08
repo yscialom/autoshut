@@ -1,6 +1,3 @@
-import sys  # sys.exit as a temporary debug tool
-
-
 class Register:
     """Register functions through a decorator to be dynamicly found later.
 
@@ -95,7 +92,7 @@ class Rule:
         self._normalized_value = self._normalize(kwargs['value'], kwargs['unit'])
         self._comparator_name = kwargs['comparator']
         self._action_name = kwargs['action']
-        self._action = Action(kwargs['logger'], self)
+        self._action = Action(kwargs['logger'], self, kwargs['shutdown_filepath'])
 
     def __str__(self):
         return f'rule "{self.name}" triggers when {self._metric} is {self._comparator_name}'\
@@ -128,12 +125,18 @@ class Action:
 
     @action('shutdown')
     def _shutdown(self, metric):
-        self._logger.info('shutting down...')
-        sys.exit(0)
+        self._logger.info('Shutting down...')
+        self._logger.debug(f'Writting "true" in "{self._shutdown_filepath}"')
+        try:
+            with open(self._shutdown_filepath, 'w') as fp:
+                fp.write('true\n')
+        except OSError as e:
+            self._logger.error(f'Unable to send signal shutdown: {e}')
 
-    def __init__(self, logger, rule):
+    def __init__(self, logger, rule, shutdown_filepath):
         self._logger = logger
         self._rule = rule
+        self._shutdown_filepath = shutdown_filepath
 
     def __call__(self, metric):
         self._logger.info(f'rule "{self._rule.name}" triggered by metric "{self._rule._metric}": '

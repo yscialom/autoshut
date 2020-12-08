@@ -34,5 +34,5 @@ class MetricServer:
         try:
             return self.Snapshot(json.loads(urllib.request.urlopen(self._url).read()), self._metric_path_separator)
         except urllib.error.URLError as e:
-            self._logger.warning('Cannot read from metric server.')
+            self._logger.warning('Cannot read from metric server. Is it started yet?')
             self._logger.debug(e)

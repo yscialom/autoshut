@@ -29,6 +29,9 @@ class Config:
         parser = configparser.ConfigParser()
         parser.read(self._config_filepath)
 
+        # constants
+        self._shutdown_filepath = '/var/autoshut/shutdown_signal'
+
         # load [option]
         try:
             self.interval_in_seconds = int(parser['options']['interval_in_seconds'])
@@ -49,12 +52,13 @@ class Config:
                 try:
                     self.rules.append(Rule(
                         logger=self._logger,
-                        name=section,
+                        name=rulename,
                         metric=parser[section]['metric'],
                         value=float(parser[section]['value']),
                         unit=parser[section]['unit'],
                         comparator=parser[section]['comparator'],
-                        action=parser[section]['action']
+                        action=parser[section]['action'],
+                        shutdown_filepath=self._shutdown_filepath
                     ))
                 except KeyError as e:
                     self._logger.error(f'invalid rule {rulename} (missing entry).')

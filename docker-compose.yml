@@ -8,6 +8,9 @@ services:
     network_mode: host
     volumes:
       - config:/etc/autoshut
+      - ${PWD}/signals/controller_shutdown_signal:/var/autoshut/shutdown_signal
+    depends_on:
+      - monitor
 
 volumes:
   config:
